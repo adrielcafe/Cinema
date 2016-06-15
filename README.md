@@ -1,3 +1,5 @@
+![](app/src/main/res/mipmap-xxhdpi/ic_launcher.png) 
+
 # Cinema
 
 Simple android app to list popular and top rated movies from [The Movie Database](https://www.themoviedb.org).
