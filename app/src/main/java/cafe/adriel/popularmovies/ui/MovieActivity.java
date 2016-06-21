@@ -3,6 +3,7 @@ package cafe.adriel.popularmovies.ui;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -76,8 +77,14 @@ public class MovieActivity extends BaseActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.movie, menu);
-        menu.getItem(0).setIcon(new IconicsDrawable(this)
+        menu.findItem(R.id.share)
+                .setIcon(new IconicsDrawable(this)
                 .icon(GoogleMaterial.Icon.gmd_share)
+                .color(Color.BLACK)
+                .sizeDp(24));
+        menu.findItem(R.id.reviews)
+                .setIcon(new IconicsDrawable(this)
+                .icon(GoogleMaterial.Icon.gmd_mode_comment)
                 .color(Color.BLACK)
                 .sizeDp(24));
         return true;
@@ -91,6 +98,9 @@ public class MovieActivity extends BaseActivity {
                 break;
             case R.id.share:
                 shareMovie();
+                break;
+            case R.id.reviews:
+                showReviews();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -140,4 +150,11 @@ public class MovieActivity extends BaseActivity {
         String text = String.format("%s\n%s", movie.getTitle(), movie.getTrailerUrl());
         Util.shareText(this, text);
     }
+
+    private void showReviews() {
+        if(Util.isConnected(this, true)){
+
+        }
+    }
+
 }

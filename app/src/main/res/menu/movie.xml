@@ -6,6 +6,11 @@
     <item
         android:id="@+id/share"
         android:title="@string/share"
-        app:showAsAction="always"/>
+        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/reviews"
+        android:title="@string/reviews"
+        app:showAsAction="ifRoom"/>
 
 </menu>
