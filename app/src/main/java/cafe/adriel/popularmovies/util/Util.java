@@ -12,8 +12,6 @@ import android.widget.Toast;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
 
-import net.danlew.android.joda.DateUtils;
-
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 
@@ -30,8 +28,12 @@ public class Util {
                 .parseDateTime(date);
     }
 
-    public static String prettyDate(Context context, DateTime date){
-        return DateUtils.formatDateTime(context, date, DateUtils.FORMAT_SHOW_YEAR);
+    public static String toDbDate(DateTime date){
+        return DateTimeFormat.forPattern("yyyy-MM-dd").print(date);
+    }
+
+    public static String toPrettyDate(DateTime date){
+        return DateTimeFormat.mediumDate().print(date.getMillis());
     }
 
     public static void setupToolbar(Context context, Toolbar toolbar){

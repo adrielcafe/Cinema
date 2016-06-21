@@ -1,21 +1,28 @@
 package cafe.adriel.popularmovies.ui;
 
+import android.graphics.Color;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.mikepenz.google_material_typeface_library.GoogleMaterial;
+import com.mikepenz.iconics.IconicsDrawable;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import cafe.adriel.popularmovies.R;
 import cafe.adriel.popularmovies.event.ShowMovieEvent;
+import cafe.adriel.popularmovies.event.UpdateFavoritesEvent;
 import cafe.adriel.popularmovies.model.Movie;
+import cafe.adriel.popularmovies.util.MoviesUtil;
 import cafe.adriel.popularmovies.util.Util;
 import icepick.State;
 
@@ -34,6 +41,8 @@ public class MovieActivity extends BaseActivity {
     TextView ratingView;
     @BindView(R.id.overview)
     TextView overviewView;
+    @BindView(R.id.favorite)
+    FloatingActionButton favoriteView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,10 +81,17 @@ public class MovieActivity extends BaseActivity {
     }
 
     @Subscribe(sticky = true)
-    public void showMovieEvent(ShowMovieEvent event){
+    public void onShowMovieEvent(ShowMovieEvent event){
         EventBus.getDefault().removeStickyEvent(event);
         movie = event.movie;
         init();
+    }
+
+    @OnClick(R.id.favorite)
+    public void toggleFavorite(){
+        boolean isFavorite = MoviesUtil.toggleFavorite(this, movie);
+        updateFavoriteFab(isFavorite);
+        EventBus.getDefault().postSticky(new UpdateFavoritesEvent());
     }
 
     @Override
@@ -84,8 +100,18 @@ public class MovieActivity extends BaseActivity {
         Glide.with(this)
                 .load(movie.getBackdropUrl())
                 .into(backdropView);
-        releaseDateView.setText(Util.prettyDate(this, movie.getReleaseDate()));
+        releaseDateView.setText(Util.toPrettyDate(movie.getReleaseDate()));
         ratingView.setText(movie.getRating()+"");
         overviewView.setText(movie.getOverview());
+        updateFavoriteFab(MoviesUtil.isFavorite(this, movie));
+    }
+
+    private void updateFavoriteFab(boolean isFavorite){
+        GoogleMaterial.Icon favoriteIcon = isFavorite ?
+                GoogleMaterial.Icon.gmd_favorite : GoogleMaterial.Icon.gmd_favorite_border;
+        favoriteView.setImageDrawable(new IconicsDrawable(this)
+                .icon(favoriteIcon)
+                .color(Color.WHITE)
+                .sizeDp(24));
     }
 }

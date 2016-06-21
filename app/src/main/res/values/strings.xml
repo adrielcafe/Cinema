@@ -2,5 +2,6 @@
     <string name="app_name">Cinema</string>
     <string name="popular">Popular</string>
     <string name="top_rated">Top Rated</string>
+    <string name="favorites">Favorites</string>
     <string name="connect_internet">Connect to internet</string>
 </resources>

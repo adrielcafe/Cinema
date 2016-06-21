@@ -5,6 +5,7 @@ import org.joda.time.DateTime;
 import java.io.Serializable;
 
 public class Movie implements Serializable {
+    private int id;
     private String title;
     private String overview;
     private String posterUrl;
@@ -12,6 +13,14 @@ public class Movie implements Serializable {
     private DateTime releaseDate;
     private float rating;
     private boolean adult;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public String getTitle() {
         return title;

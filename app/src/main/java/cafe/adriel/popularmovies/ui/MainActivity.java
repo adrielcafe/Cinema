@@ -29,7 +29,6 @@ public class MainActivity extends BaseActivity {
         ButterKnife.bind(this);
         setSupportActionBar(toolbar);
         Util.setupToolbar(this, toolbar);
-        Util.isConnected(this, true);
         init();
     }
 
@@ -54,6 +53,8 @@ public class MainActivity extends BaseActivity {
                     return MoviesFragment.newInstance(MoviesFragment.Type.POPULAR);
                 case 1:
                     return MoviesFragment.newInstance(MoviesFragment.Type.TOP_RATED);
+                case 2:
+                    return MoviesFragment.newInstance(MoviesFragment.Type.FAVORITES);
                 default:
                     return null;
             }
@@ -66,6 +67,8 @@ public class MainActivity extends BaseActivity {
                     return getString(R.string.popular);
                 case 1:
                     return getString(R.string.top_rated);
+                case 2:
+                    return getString(R.string.favorites);
                 default:
                     return null;
             }
@@ -73,7 +76,7 @@ public class MainActivity extends BaseActivity {
 
         @Override
         public int getCount() {
-            return 2;
+            return 3;
         }
     }
 }

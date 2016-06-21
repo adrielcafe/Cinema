@@ -24,6 +24,9 @@
         <activity
             android:name=".ui.MovieActivity"
             android:theme="@style/AppTheme.NoActionBar"/>
+        <provider
+            android:name=".provider.MovieContentProvider"
+            android:authorities="cafe.adriel.popularmovies"/>
     </application>
 
 </manifest>
