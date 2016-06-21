@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.goebl.david.Webb;
 
@@ -91,7 +92,7 @@ public class MoviesUtil {
                     .asJsonObject()
                     .getBody()
                     .getJSONArray("results");
-            List<Movie> movies = toMovies(moviesJson);
+            List<Movie> movies = toMovies(activity, moviesJson);
             deleteMovies(activity, type);
             saveMovies(activity, type, movies);
         } catch (JSONException e){
@@ -146,6 +147,7 @@ public class MoviesUtil {
                     movieValues.put(MovieContract.OVERVIEW, movie.getOverview());
                     movieValues.put(MovieContract.POSTER_URL, movie.getPosterUrl());
                     movieValues.put(MovieContract.BACKDROP_URL, movie.getBackdropUrl());
+                    movieValues.put(MovieContract.TRAILER_URL, movie.getTrailerUrl());
                     movieValues.put(MovieContract.RELEASE_DATE, Util.toDbDate(movie.getReleaseDate()));
                     movieValues.put(MovieContract.RATING, movie.getRating());
                     movieValues.put(MovieContract.ADULT, movie.isAdult() ? 1 : 0);
@@ -178,6 +180,8 @@ public class MoviesUtil {
                     cursor.getColumnIndex(MovieContract.POSTER_URL)));
             movie.setBackdropUrl(cursor.getString(
                     cursor.getColumnIndex(MovieContract.BACKDROP_URL)));
+            movie.setTrailerUrl(cursor.getString(
+                    cursor.getColumnIndex(MovieContract.TRAILER_URL)));
             movie.setReleaseDate(Util.toDate(cursor.getString(
                     cursor.getColumnIndex(MovieContract.RELEASE_DATE))));
             movie.setRating(cursor.getFloat(
@@ -189,18 +193,20 @@ public class MoviesUtil {
         return movies;
     }
 
-    private static List<Movie> toMovies(JSONArray jsonMovies){
+    private static List<Movie> toMovies(Context context, JSONArray jsonMovies){
         List<Movie> movies = new ArrayList<>();
         if(jsonMovies != null) {
             for (int i = 0; i < jsonMovies.length(); i++) {
                 try {
                     JSONObject jsonMovie = jsonMovies.getJSONObject(i);
+                    int movieId = jsonMovie.getInt("id");
                     Movie movie = new Movie();
-                    movie.setId(jsonMovie.getInt("id"));
+                    movie.setId(movieId);
                     movie.setTitle(jsonMovie.getString("title"));
                     movie.setOverview(jsonMovie.getString("overview"));
                     movie.setPosterUrl(String.format(TMDB_POSTER_URL, jsonMovie.getString("poster_path")));
                     movie.setBackdropUrl(String.format(TMDB_BACKDROP_URL, jsonMovie.getString("backdrop_path")));
+                    movie.setTrailerUrl(getTrailerUrl(context, movieId));
                     movie.setReleaseDate(Util.toDate(jsonMovie.getString("release_date")));
                     movie.setRating((float) jsonMovie.getDouble("vote_average"));
                     movie.setAdult(jsonMovie.getBoolean("adult"));
@@ -211,6 +217,27 @@ public class MoviesUtil {
             }
         }
         return movies;
+    }
+
+    private static String getTrailerUrl(Context context, int movieId){
+        String apiUrl = String.format(TMDB_API_VIDEOS_URL, movieId, context.getString(R.string.tmdb_api_key));
+        try {
+            JSONArray trailersJson = WEBB.get(apiUrl)
+                    .ensureSuccess()
+                    .asJsonObject()
+                    .getBody()
+                    .getJSONArray("results");
+            for (int i = 0; i < trailersJson.length(); i++) {
+                JSONObject trailerJson = trailersJson.getJSONObject(i);
+                if(trailerJson.getString("site").toLowerCase().equals("youtube")){
+                    return "https://youtube.com/watch?v=" + trailerJson.getString("key");
+                }
+            }
+            return "";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "";
+        }
     }
 
 }

@@ -4,6 +4,9 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -71,10 +74,23 @@ public class MovieActivity extends BaseActivity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.movie, menu);
+        menu.getItem(0).setIcon(new IconicsDrawable(this)
+                .icon(GoogleMaterial.Icon.gmd_share)
+                .color(Color.BLACK)
+                .sizeDp(24));
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case android.R.id.home:
                 onBackPressed();
+                break;
+            case R.id.share:
+                shareMovie();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -85,6 +101,11 @@ public class MovieActivity extends BaseActivity {
         EventBus.getDefault().removeStickyEvent(event);
         movie = event.movie;
         init();
+    }
+
+    @OnClick(R.id.trailer)
+    public void playTrailer(){
+        Util.openLinkInExternalApp(this, movie.getTrailerUrl());
     }
 
     @OnClick(R.id.favorite)
@@ -112,6 +133,11 @@ public class MovieActivity extends BaseActivity {
         favoriteView.setImageDrawable(new IconicsDrawable(this)
                 .icon(favoriteIcon)
                 .color(Color.WHITE)
-                .sizeDp(24));
+                .sizeDp(48));
+    }
+
+    private void shareMovie() {
+        String text = String.format("%s\n%s", movie.getTitle(), movie.getTrailerUrl());
+        Util.shareText(this, text);
     }
 }

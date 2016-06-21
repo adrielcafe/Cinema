@@ -30,6 +30,9 @@ public class MovieContract implements ProviGenBaseContract {
     public static final String BACKDROP_URL = "backdropUrl";
 
     @Column(Column.Type.TEXT)
+    public static final String TRAILER_URL = "trailerUrl";
+
+    @Column(Column.Type.TEXT)
     public static final String RELEASE_DATE = "releaseDate";
 
     @Column(Column.Type.REAL)

@@ -29,7 +29,7 @@ import cafe.adriel.popularmovies.util.MoviesUtil;
 import icepick.Icepick;
 import icepick.State;
 
-public class MoviesFragment extends BaseFragment implements SwipeRefreshLayout.OnRefreshListener, RecyclerItemClickSupport.OnItemClickListener{
+public class MoviesFragment extends BaseFragment implements SwipeRefreshLayout.OnRefreshListener, RecyclerItemClickSupport.OnItemClickListener {
     private static final String ARG_FRAG_TYPE = "fragType";
 
     public enum Type {

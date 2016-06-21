@@ -2,9 +2,12 @@ package cafe.adriel.popularmovies.util;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
+import android.support.v4.app.ShareCompat;
 import android.support.v7.widget.Toolbar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -54,6 +57,18 @@ public class Util {
         toolbar.setLogo(new IconicsDrawable(context)
                 .icon(GoogleMaterial.Icon.gmd_movie)
                 .sizeDp(24));
+    }
+
+    public static void shareText(Activity activity, String text){
+        ShareCompat.IntentBuilder.from(activity)
+                .setType("text/plain")
+                .setText(text)
+                .startChooser();
+    }
+
+    public static void openLinkInExternalApp(Context context, String link){
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
+        context.startActivity(intent);
     }
 
     public static boolean isConnected(final Activity activity, boolean showToast){
