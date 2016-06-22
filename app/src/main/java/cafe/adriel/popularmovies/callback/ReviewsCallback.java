@@ -1,4 +1,4 @@
-package cafe.adriel.popularmovies.util;
+package cafe.adriel.popularmovies.callback;
 
 import java.util.List;
 

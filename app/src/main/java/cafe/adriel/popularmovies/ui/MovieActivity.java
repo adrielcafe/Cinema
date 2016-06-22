@@ -24,13 +24,13 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import cafe.adriel.popularmovies.R;
+import cafe.adriel.popularmovies.callback.ReviewsCallback;
 import cafe.adriel.popularmovies.event.ShowMovieEvent;
 import cafe.adriel.popularmovies.event.UpdateFavoritesEvent;
 import cafe.adriel.popularmovies.model.Movie;
 import cafe.adriel.popularmovies.model.Review;
 import cafe.adriel.popularmovies.ui.adapter.ReviewsAdapter;
 import cafe.adriel.popularmovies.util.MoviesUtil;
-import cafe.adriel.popularmovies.util.ReviewsCallback;
 import cafe.adriel.popularmovies.util.Util;
 import icepick.State;
 

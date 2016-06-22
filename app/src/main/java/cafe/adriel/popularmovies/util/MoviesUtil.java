@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cafe.adriel.popularmovies.R;
+import cafe.adriel.popularmovies.callback.MoviesCallback;
+import cafe.adriel.popularmovies.callback.ReviewsCallback;
 import cafe.adriel.popularmovies.model.Movie;
 import cafe.adriel.popularmovies.model.Review;
 import cafe.adriel.popularmovies.provider.MovieContract;
