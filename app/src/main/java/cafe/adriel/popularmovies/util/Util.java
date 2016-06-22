@@ -59,18 +59,6 @@ public class Util {
                 .sizeDp(24));
     }
 
-    public static void shareText(Activity activity, String text){
-        ShareCompat.IntentBuilder.from(activity)
-                .setType("text/plain")
-                .setText(text)
-                .startChooser();
-    }
-
-    public static void openLinkInExternalApp(Context context, String link){
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
-        context.startActivity(intent);
-    }
-
     public static boolean isConnected(final Activity activity, boolean showToast){
         if(connectivityManager == null) {
             connectivityManager = (ConnectivityManager) activity.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -86,6 +74,18 @@ public class Util {
             });
         }
         return isConnected;
+    }
+
+    public static void shareText(Activity activity, String text){
+        ShareCompat.IntentBuilder.from(activity)
+                .setType("text/plain")
+                .setText(text)
+                .startChooser();
+    }
+
+    public static void openLinkInExternalApp(Context context, String link){
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
+        context.startActivity(intent);
     }
 
 }

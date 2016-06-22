@@ -5,7 +5,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.AsyncTask;
-import android.util.Log;
 
 import com.goebl.david.Webb;
 
@@ -35,10 +34,9 @@ public class MoviesUtil {
 
     public static boolean isFavorite(Context context, Movie movie){
         Cursor cursor = context.getContentResolver()
-                .query(
-                        MovieContract.CONTENT_URI,
+                .query(MovieContract.CONTENT_URI,
                         null,
-                        MovieContract.MOVIE_ID + " = ? and " + MovieContract.TYPE + " = ?",
+                        String.format("%s = ? and %s = ?", MovieContract.MOVIE_ID, MovieContract.TYPE),
                         new String[]{ movie.getId() + "", TYPE_FAVORITES },
                         null
                 );
@@ -49,10 +47,7 @@ public class MoviesUtil {
 
     public static boolean toggleFavorite(Context context, Movie movie){
         if(isFavorite(context, movie)) {
-            context.getContentResolver()
-                    .delete(MovieContract.CONTENT_URI,
-                            MovieContract.MOVIE_ID + " = ? and " + MovieContract.TYPE + " = ?",
-                            new String[]{ movie.getId() + "", TYPE_FAVORITES });
+            deleteMovie(context, TYPE_FAVORITES, movie);
             return false;
         } else {
             saveMovie(context, TYPE_FAVORITES, movie);
@@ -128,10 +123,15 @@ public class MoviesUtil {
         }
     }
 
-    private static void saveMovie(Context context, String type, Movie movie){
-        List<Movie> movies = new ArrayList<>();
-        movies.add(movie);
-        saveMovies(context, type, movies);
+    private static void saveMovie(final Context context, final String type, final Movie movie){
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                List<Movie> movies = new ArrayList<>();
+                movies.add(movie);
+                saveMovies(context, type, movies);
+            }
+        });
     }
 
     private static void saveMovies(Context context, String type, List<Movie> movies){
@@ -159,11 +159,28 @@ public class MoviesUtil {
         }
     }
 
-    private static void deleteMovies(Context context, String type){
-        context.getContentResolver()
-                .delete(MovieContract.CONTENT_URI,
-                        MovieContract.TYPE + " = ?",
-                        new String[]{ type });
+    private static void deleteMovie(final Context context, final String type, final Movie movie){
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                context.getContentResolver()
+                        .delete(MovieContract.CONTENT_URI,
+                                MovieContract.MOVIE_ID + " = ? and " + MovieContract.TYPE + " = ?",
+                                new String[]{ movie.getId() + "", type });
+            }
+        });
+    }
+
+    private static void deleteMovies(final Context context, final String type){
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                context.getContentResolver()
+                        .delete(MovieContract.CONTENT_URI,
+                                MovieContract.TYPE + " = ?",
+                                new String[]{ type });
+            }
+        });
     }
 
     private static List<Movie> toMovies(Cursor cursor){

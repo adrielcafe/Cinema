@@ -8,13 +8,13 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.rohit.recycleritemclicksupport.RecyclerItemClickSupport;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -39,9 +39,8 @@ public class MoviesFragment extends BaseFragment implements SwipeRefreshLayout.O
     }
 
     @State
-    ArrayList<Movie> movies;
-    @State
     Type fragType;
+    List<Movie> movies;
 
     @BindView(R.id.refresh)
     SwipeRefreshLayout refreshView;
@@ -107,7 +106,8 @@ public class MoviesFragment extends BaseFragment implements SwipeRefreshLayout.O
     @Override
     protected void init(){
         GridLayoutManager gridLayout = new GridLayoutManager(getContext(), 2);
-        RecyclerItemClickSupport.addTo(moviesView).setOnItemClickListener(this);
+        RecyclerItemClickSupport.addTo(moviesView)
+                .setOnItemClickListener(this);
         moviesView.setLayoutManager(gridLayout);
         moviesView.setHasFixedSize(true);
         refreshView.setOnRefreshListener(this);
@@ -119,13 +119,15 @@ public class MoviesFragment extends BaseFragment implements SwipeRefreshLayout.O
             MoviesCallback callback = new MoviesCallback() {
                 @Override
                 public void success(List<Movie> result) {
-                    movies = new ArrayList<>(result);
+                    movies = result;
                     moviesView.setAdapter(new MoviesAdapter(getContext(), movies));
                     refreshView.setRefreshing(false);
                 }
                 @Override
                 public void error(Exception error) {
+                    Toast.makeText(getContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
                     error.printStackTrace();
+                    refreshView.setRefreshing(false);
                 }
             };
             switch (fragType) {
