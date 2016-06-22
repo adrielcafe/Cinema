@@ -3,6 +3,8 @@ package cafe.adriel.popularmovies.ui;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -16,6 +18,8 @@ import com.mikepenz.iconics.IconicsDrawable;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+import java.util.List;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -23,7 +27,10 @@ import cafe.adriel.popularmovies.R;
 import cafe.adriel.popularmovies.event.ShowMovieEvent;
 import cafe.adriel.popularmovies.event.UpdateFavoritesEvent;
 import cafe.adriel.popularmovies.model.Movie;
+import cafe.adriel.popularmovies.model.Review;
+import cafe.adriel.popularmovies.ui.adapter.ReviewsAdapter;
 import cafe.adriel.popularmovies.util.MoviesUtil;
+import cafe.adriel.popularmovies.util.ReviewsCallback;
 import cafe.adriel.popularmovies.util.Util;
 import icepick.State;
 
@@ -42,6 +49,8 @@ public class MovieActivity extends BaseActivity {
     TextView ratingView;
     @BindView(R.id.overview)
     TextView overviewView;
+    @BindView(R.id.reviews)
+    RecyclerView reviewsView;
     @BindView(R.id.favorite)
     FloatingActionButton favoriteView;
 
@@ -76,14 +85,9 @@ public class MovieActivity extends BaseActivity {
         getMenuInflater().inflate(R.menu.movie, menu);
         menu.findItem(R.id.share)
                 .setIcon(new IconicsDrawable(this)
-                .icon(GoogleMaterial.Icon.gmd_share)
-                .color(Color.BLACK)
-                .sizeDp(24));
-        menu.findItem(R.id.reviews)
-                .setIcon(new IconicsDrawable(this)
-                .icon(GoogleMaterial.Icon.gmd_mode_comment)
-                .color(Color.BLACK)
-                .sizeDp(24));
+                        .icon(GoogleMaterial.Icon.gmd_share)
+                        .color(Color.BLACK)
+                        .sizeDp(24));
         return true;
     }
 
@@ -95,9 +99,6 @@ public class MovieActivity extends BaseActivity {
                 break;
             case R.id.share:
                 shareMovie();
-                break;
-            case R.id.reviews:
-                showReviews();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -128,10 +129,13 @@ public class MovieActivity extends BaseActivity {
         Glide.with(this)
                 .load(movie.getBackdropUrl())
                 .into(backdropView);
+        reviewsView.setLayoutManager(new LinearLayoutManager(this));
+        reviewsView.setHasFixedSize(false);
         releaseDateView.setText(Util.toPrettyDate(movie.getReleaseDate()));
         ratingView.setText(movie.getRating()+"");
         overviewView.setText(movie.getOverview());
         updateFavoriteFab(MoviesUtil.isFavorite(this, movie));
+        loadReviews();
     }
 
     private void updateFavoriteFab(boolean isFavorite){
@@ -148,10 +152,17 @@ public class MovieActivity extends BaseActivity {
         Util.shareText(this, text);
     }
 
-    private void showReviews() {
-        if(Util.isConnected(this, true)){
-
-        }
+    private void loadReviews() {
+        MoviesUtil.getReviewsFromApi(this, movie, new ReviewsCallback() {
+            @Override
+            public void success(List<Review> reviews) {
+                reviewsView.setAdapter(new ReviewsAdapter(MovieActivity.this, reviews));
+            }
+            @Override
+            public void error(Exception error) {
+                error.printStackTrace();
+            }
+        });
     }
 
 }

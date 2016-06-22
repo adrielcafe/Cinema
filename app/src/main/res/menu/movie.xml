@@ -8,9 +8,4 @@
         android:title="@string/share"
         app:showAsAction="ifRoom"/>
 
-    <item
-        android:id="@+id/reviews"
-        android:title="@string/reviews"
-        app:showAsAction="ifRoom"/>
-
 </menu>

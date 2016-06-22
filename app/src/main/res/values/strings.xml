@@ -6,4 +6,6 @@
     <string name="connect_internet">Connect to internet</string>
     <string name="share">Share</string>
     <string name="reviews">Reviews</string>
+    <string name="review_by">Review by %1$s</string>
+    <string name="no_review_found">No review found</string>
 </resources>

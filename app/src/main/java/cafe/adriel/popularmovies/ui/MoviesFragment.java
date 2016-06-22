@@ -105,10 +105,9 @@ public class MoviesFragment extends BaseFragment implements SwipeRefreshLayout.O
 
     @Override
     protected void init(){
-        GridLayoutManager gridLayout = new GridLayoutManager(getContext(), 2);
         RecyclerItemClickSupport.addTo(moviesView)
                 .setOnItemClickListener(this);
-        moviesView.setLayoutManager(gridLayout);
+        moviesView.setLayoutManager(new GridLayoutManager(getContext(), 2));
         moviesView.setHasFixedSize(true);
         refreshView.setOnRefreshListener(this);
         updateMovies();

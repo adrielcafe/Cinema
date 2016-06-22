@@ -17,6 +17,7 @@ import java.util.List;
 
 import cafe.adriel.popularmovies.R;
 import cafe.adriel.popularmovies.model.Movie;
+import cafe.adriel.popularmovies.model.Review;
 import cafe.adriel.popularmovies.provider.MovieContract;
 
 public class MoviesUtil {
@@ -98,8 +99,7 @@ public class MoviesUtil {
     private static void getMoviesFromDb(Activity activity, String type, final MoviesCallback callback){
         try {
             Cursor cursor = activity.getContentResolver()
-                    .query(
-                            MovieContract.CONTENT_URI,
+                    .query(MovieContract.CONTENT_URI,
                             null,
                             MovieContract.TYPE + " = ?",
                             new String[]{ type },
@@ -118,6 +118,54 @@ public class MoviesUtil {
                 @Override
                 public void run() {
                     callback.error(e);
+                }
+            });
+        }
+    }
+
+    public static void getReviewsFromApi(final Activity activity, final Movie movie, final ReviewsCallback callback){
+        if(Util.isConnected(activity, false)) {
+            AsyncTask.execute(new Runnable() {
+                @Override
+                public void run() {
+                    String apiUrl = String.format(TMDB_API_REVIEWS_URL, movie.getId(), activity.getString(R.string.tmdb_api_key));
+                    try {
+                        JSONArray reviewsJson = WEBB.get(apiUrl)
+                                .ensureSuccess()
+                                .asJsonObject()
+                                .getBody()
+                                .getJSONArray("results");
+                        final List<Review> reviews = toReviews(reviewsJson);
+                        if (reviews.isEmpty()) {
+                            Review review = new Review();
+                            review.setContent(activity.getString(R.string.no_review_found));
+                            reviews.add(review);
+                        }
+                        activity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                callback.success(reviews);
+                            }
+                        });
+                    } catch (final Exception e) {
+                        activity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                callback.error(e);
+                            }
+                        });
+                    }
+                }
+            });
+        } else {
+            Review review = new Review();
+            review.setContent(activity.getString(R.string.connect_internet));
+            final List<Review> reviews = new ArrayList<>();
+            reviews.add(review);
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    callback.success(reviews);
                 }
             });
         }
@@ -234,6 +282,24 @@ public class MoviesUtil {
             }
         }
         return movies;
+    }
+
+    private static List<Review> toReviews(JSONArray jsonReviews){
+        List<Review> reviews = new ArrayList<>();
+        if(jsonReviews != null) {
+            for (int i = 0; i < jsonReviews.length(); i++) {
+                try {
+                    JSONObject jsonReview = jsonReviews.getJSONObject(i);
+                    Review review = new Review();
+                    review.setAuthor(jsonReview.getString("author"));
+                    review.setContent(jsonReview.getString("content"));
+                    reviews.add(review);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return reviews;
     }
 
     private static String getTrailerUrl(Context context, int movieId){

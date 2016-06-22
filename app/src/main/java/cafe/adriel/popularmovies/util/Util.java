@@ -26,6 +26,10 @@ public class Util {
 
     private static ConnectivityManager connectivityManager;
 
+    public static boolean isEmpty(String str){
+        return str == null || str.isEmpty();
+    }
+
     public static DateTime toDate(String date){
         return DateTimeFormat.forPattern("yyyy-MM-dd")
                 .parseDateTime(date);
