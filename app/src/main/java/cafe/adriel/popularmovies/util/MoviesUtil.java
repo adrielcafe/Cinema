@@ -86,7 +86,6 @@ public class MoviesUtil {
         String apiUrl = String.format(TMDB_API_MOVIES_URL, type, activity.getString(R.string.tmdb_api_key), 1);
         try {
             JSONArray moviesJson = WEBB.get(apiUrl)
-                    .ensureSuccess()
                     .asJsonObject()
                     .getBody()
                     .getJSONArray("results");
@@ -131,24 +130,13 @@ public class MoviesUtil {
                 @Override
                 public void run() {
                     String apiUrl = String.format(TMDB_API_REVIEWS_URL, movie.getId(), activity.getString(R.string.tmdb_api_key));
+                    final List<Review> reviews = new ArrayList<>();
                     try {
                         JSONArray reviewsJson = WEBB.get(apiUrl)
-                                .ensureSuccess()
                                 .asJsonObject()
                                 .getBody()
                                 .getJSONArray("results");
-                        final List<Review> reviews = toReviews(reviewsJson);
-                        if (reviews.isEmpty()) {
-                            Review review = new Review();
-                            review.setContent(activity.getString(R.string.no_review_found));
-                            reviews.add(review);
-                        }
-                        activity.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                callback.success(reviews);
-                            }
-                        });
+                        reviews.addAll(toReviews(reviewsJson));
                     } catch (final Exception e) {
                         activity.runOnUiThread(new Runnable() {
                             @Override
@@ -157,6 +145,17 @@ public class MoviesUtil {
                             }
                         });
                     }
+                    if (reviews.isEmpty()) {
+                        Review review = new Review();
+                        review.setContent(activity.getString(R.string.no_review_found));
+                        reviews.add(review);
+                    }
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            callback.success(reviews);
+                        }
+                    });
                 }
             });
         } else {
@@ -308,7 +307,6 @@ public class MoviesUtil {
         String apiUrl = String.format(TMDB_API_VIDEOS_URL, movieId, context.getString(R.string.tmdb_api_key));
         try {
             JSONArray trailersJson = WEBB.get(apiUrl)
-                    .ensureSuccess()
                     .asJsonObject()
                     .getBody()
                     .getJSONArray("results");

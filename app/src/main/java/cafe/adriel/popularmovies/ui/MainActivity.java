@@ -8,19 +8,24 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 
+import org.greenrobot.eventbus.EventBus;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import cafe.adriel.popularmovies.R;
+import cafe.adriel.popularmovies.event.TwoPaneEvent;
 import cafe.adriel.popularmovies.util.Util;
 
 public class MainActivity extends BaseActivity {
+
+    boolean twoPane;
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
     @BindView(R.id.tabs)
     TabLayout tabLayout;
-    @BindView(R.id.pager)
-    ViewPager viewPager;
+    @BindView(R.id.movies)
+    ViewPager moviesView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,15 +34,21 @@ public class MainActivity extends BaseActivity {
         ButterKnife.bind(this);
         setSupportActionBar(toolbar);
         Util.setupToolbar(this, toolbar);
+
+        if(findViewById(R.id.movie_detail) != null){
+            twoPane = true;
+        }
+
         init();
     }
 
     @Override
     protected void init() {
         TabAdapter tabAdapter = new TabAdapter(getSupportFragmentManager());
-        viewPager.setOffscreenPageLimit(2);
-        viewPager.setAdapter(tabAdapter);
-        tabLayout.setupWithViewPager(viewPager);
+        moviesView.setOffscreenPageLimit(2);
+        moviesView.setAdapter(tabAdapter);
+        tabLayout.setupWithViewPager(moviesView);
+        EventBus.getDefault().postSticky(new TwoPaneEvent(twoPane));
     }
 
     public class TabAdapter extends FragmentPagerAdapter {
@@ -50,11 +61,11 @@ public class MainActivity extends BaseActivity {
         public Fragment getItem(int position) {
             switch (position) {
                 case 0:
-                    return MoviesFragment.newInstance(MoviesFragment.Type.POPULAR);
+                    return MoviesFragment.newInstance(MoviesFragment.Type.POPULAR, twoPane);
                 case 1:
-                    return MoviesFragment.newInstance(MoviesFragment.Type.TOP_RATED);
+                    return MoviesFragment.newInstance(MoviesFragment.Type.TOP_RATED, twoPane);
                 case 2:
-                    return MoviesFragment.newInstance(MoviesFragment.Type.FAVORITES);
+                    return MoviesFragment.newInstance(MoviesFragment.Type.FAVORITES, twoPane);
                 default:
                     return null;
             }

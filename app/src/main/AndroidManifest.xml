@@ -23,7 +23,8 @@
         </activity>
         <activity
             android:name=".ui.MovieActivity"
-            android:theme="@style/AppTheme.NoActionBar"/>
+            android:theme="@style/AppTheme.NoActionBar"
+            android:parentActivityName=".ui.MainActivity"/>
         <provider
             android:name=".provider.MovieContentProvider"
             android:authorities="cafe.adriel.popularmovies"/>

@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +23,7 @@ import butterknife.ButterKnife;
 import cafe.adriel.popularmovies.R;
 import cafe.adriel.popularmovies.callback.MoviesCallback;
 import cafe.adriel.popularmovies.event.ShowMovieEvent;
+import cafe.adriel.popularmovies.event.TwoPaneEvent;
 import cafe.adriel.popularmovies.event.UpdateFavoritesEvent;
 import cafe.adriel.popularmovies.model.Movie;
 import cafe.adriel.popularmovies.ui.adapter.MoviesAdapter;
@@ -31,8 +31,10 @@ import cafe.adriel.popularmovies.util.MoviesUtil;
 import icepick.Icepick;
 import icepick.State;
 
-public class MoviesFragment extends BaseFragment implements SwipeRefreshLayout.OnRefreshListener, RecyclerItemClickSupport.OnItemClickListener {
-    private static final String ARG_FRAG_TYPE = "fragType";
+public class MoviesFragment extends BaseFragment implements SwipeRefreshLayout.OnRefreshListener,
+        RecyclerItemClickSupport.OnItemClickListener {
+    private static final String ARG_FRAG_TYPE       = "fragType";
+    private static final String ARG_FRAG_TWO_PANE   = "twoPane";
 
     public enum Type {
         POPULAR,
@@ -41,19 +43,22 @@ public class MoviesFragment extends BaseFragment implements SwipeRefreshLayout.O
     }
 
     @State
+    ArrayList<Movie> movies;
+    @State
     Type fragType;
     @State
-    ArrayList<Movie> movies;
+    boolean twoPane;
 
     @BindView(R.id.refresh)
     SwipeRefreshLayout refreshView;
     @BindView(R.id.movies)
     RecyclerView moviesView;
 
-    public static MoviesFragment newInstance(Type fragType) {
+    public static MoviesFragment newInstance(Type fragType, boolean twoPane) {
         MoviesFragment fragment = new MoviesFragment();
         Bundle args = new Bundle();
         args.putSerializable(ARG_FRAG_TYPE, fragType);
+        args.putBoolean(ARG_FRAG_TWO_PANE, twoPane);
         fragment.setArguments(args);
         return fragment;
     }
@@ -62,14 +67,15 @@ public class MoviesFragment extends BaseFragment implements SwipeRefreshLayout.O
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Icepick.restoreInstanceState(this, savedInstanceState);
-        if(fragType == null && getArguments() != null){
+        if(getArguments() != null){
             fragType = (Type) getArguments().getSerializable(ARG_FRAG_TYPE);
+            twoPane = getArguments().getBoolean(ARG_FRAG_TWO_PANE);
         }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_movies, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_movies_list, container, false);
         unbinder = ButterKnife.bind(this, rootView);
         init();
         return rootView;
@@ -99,11 +105,16 @@ public class MoviesFragment extends BaseFragment implements SwipeRefreshLayout.O
     }
 
     @Subscribe(sticky = true)
-    public void onUpdateFavoritesEvent(UpdateFavoritesEvent event){
+    public void onEvent(UpdateFavoritesEvent event){
         if(fragType == Type.FAVORITES){
             EventBus.getDefault().removeStickyEvent(UpdateFavoritesEvent.class);
             onRefresh();
         }
+    }
+
+    @Subscribe(sticky = true)
+    public void onEvent(TwoPaneEvent event){
+        twoPane = event.twoPane;
     }
 
     @Override
@@ -122,7 +133,9 @@ public class MoviesFragment extends BaseFragment implements SwipeRefreshLayout.O
                 @Override
                 public void success(List<Movie> result) {
                     movies = new ArrayList<>(result);
-                    moviesView.setAdapter(new MoviesAdapter(getContext(), movies));
+                    if(moviesView != null) {
+                        moviesView.setAdapter(new MoviesAdapter(getContext(), movies));
+                    }
                     refreshView.setRefreshing(false);
                 }
                 @Override
@@ -143,7 +156,7 @@ public class MoviesFragment extends BaseFragment implements SwipeRefreshLayout.O
                     MoviesUtil.getFavoritesMovies(getActivity(), callback);
                     break;
             }
-        } else {
+        } else if(moviesView != null){
             moviesView.setAdapter(new MoviesAdapter(getContext(), movies));
             refreshView.setRefreshing(false);
         }
@@ -152,8 +165,14 @@ public class MoviesFragment extends BaseFragment implements SwipeRefreshLayout.O
     private void showMovieAtPosition(int position){
         if(movies != null && position <= movies.size() - 1) {
             Movie movie = movies.get(position);
-            startActivity(new Intent(getContext(), MovieActivity.class));
             EventBus.getDefault().postSticky(new ShowMovieEvent(movie));
+            if(twoPane){
+                getFragmentManager().beginTransaction()
+                        .replace(R.id.movie_detail, new MovieFragment())
+                        .commit();
+            } else {
+                startActivity(new Intent(getContext(), MovieActivity.class));
+            }
         }
     }
 }
