@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,7 @@ import com.rohit.recycleritemclicksupport.RecyclerItemClickSupport;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -40,7 +42,8 @@ public class MoviesFragment extends BaseFragment implements SwipeRefreshLayout.O
 
     @State
     Type fragType;
-    List<Movie> movies;
+    @State
+    ArrayList<Movie> movies;
 
     @BindView(R.id.refresh)
     SwipeRefreshLayout refreshView;
@@ -118,7 +121,7 @@ public class MoviesFragment extends BaseFragment implements SwipeRefreshLayout.O
             MoviesCallback callback = new MoviesCallback() {
                 @Override
                 public void success(List<Movie> result) {
-                    movies = result;
+                    movies = new ArrayList<>(result);
                     moviesView.setAdapter(new MoviesAdapter(getContext(), movies));
                     refreshView.setRefreshing(false);
                 }
@@ -147,8 +150,10 @@ public class MoviesFragment extends BaseFragment implements SwipeRefreshLayout.O
     }
 
     private void showMovieAtPosition(int position){
-        Movie movie = movies.get(position);
-        startActivity(new Intent(getContext(), MovieActivity.class));
-        EventBus.getDefault().postSticky(new ShowMovieEvent(movie));
+        if(movies != null && position <= movies.size() - 1) {
+            Movie movie = movies.get(position);
+            startActivity(new Intent(getContext(), MovieActivity.class));
+            EventBus.getDefault().postSticky(new ShowMovieEvent(movie));
+        }
     }
 }
